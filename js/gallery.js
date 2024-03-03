@@ -66,6 +66,10 @@ const images = [
 
 const liImages = document.querySelector(".gallery");
 
+let instance;
+
+const ESC = "Escape";
+
 function imageTemplate({ preview, original, description }) {
   return `
     <li class="gallery-item">
@@ -86,25 +90,45 @@ function imagesTemplate(array) {
   return array.map(imageTemplate).join("");
 }
 
+function render(array) {
+  const markup = imagesTemplate(array);
+  liImages.innerHTML = markup;
+}
 render(images);
 
 liImages.addEventListener("click", onListClick);
 
-// function onListClick(event) {
-//   event.preventDefault();
-//   if (event.target === event.currentTarget) {
-//     return;
-//   }
-//   const instance = basicLightBox.create(`
-//   <div class="modal">
-//   <img src=${event.target.dataset.source} alt = "${event.target.alt}" width = "1112" height ="640"/>
-//   </div>
-//   `);
+function onListClick(e) {
+  e.preventDefault();
+  if (e.target === e.currentTarget) {
+    return;
+  }
 
-//   instance.show();
-// }
+  instance = basicLightbox.create(
+    `
+  <div class="modal">
+  <img src=${e.target.dataset.source} alt = "${e.target.alt}" width = "1112" height ="640"/>
+  </div>
+  `,
+    {
+      onShow: () => {
+        document.addEventListener("keydown", closeModalEsc);
+      },
+      onClose: () => {
+        document.removeEventListener("keydown", closeModalEsc);
+      },
+    }
+  );
 
-// function render(array) {
-//   const markup = imagesTemplate(array);
-//   liImages.innerHTML = markup;
-// }
+  instance.show();
+}
+
+function closeModalEsc(e) {
+  if (e.code !== ESC) return;
+  console.log(ESC);
+  instance.close();
+}
+
+function closeModal() {
+  instance.close();
+}
